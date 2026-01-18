@@ -1,0 +1,22 @@
+# Arduino IDE
+*.hex
+*.elf
+*.bin
+
+# Build directories
+build/
+.build/
+
+# IDE files
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+*~
+*.bak
+*.swp
