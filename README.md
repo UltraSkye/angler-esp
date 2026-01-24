@@ -6,9 +6,9 @@
 
 ## Що потрібно
 
-- Плата ESP8266 (NodeMCU, Wemos D1 Mini) або ESP32 (DevKit, NodeMCU-32S)
+- Плата ESP8266 (NodeMCU, Wemos D1 Mini) або ESP32 (DevKit, NodeMCU-32S, ESP32-C3 SuperMini, ESP32-C6)
 - USB-кабель для підключення до комп'ютера
-- WiFi мережа
+- WiFi мережа (2.4 GHz для більшості плат, ESP32-C6 підтримує також 5 GHz)
 - Комп'ютер з Windows, Mac або Linux
 - Telegram для отримання сповіщень
 
@@ -76,8 +76,10 @@ Arduino IDE за замовчуванням не знає про ESP8266/ESP32. 
 
 1. Завантажте цей репозиторій (кнопка Code → Download ZIP) і розпакуйте
 2. Відкрийте папку вашої плати:
-   - `esp8266/` — для ESP8266, NodeMCU, Wemos D1
-   - `esp32/` — для ESP32, NodeMCU-32S
+   - `esp8266/` — для ESP8266, NodeMCU, Wemos D1 Mini
+   - `esp32/` — для ESP32 DevKit, NodeMCU-32S
+   - `esp32c3/` — для ESP32-C3 SuperMini, DevKit-M1
+   - `esp32c6/` — для ESP32-C6 DevKit (підтримує 5 GHz WiFi)
 3. Відкрийте файл `config.h` в текстовому редакторі
 4. Заповніть свої дані:
 
@@ -94,13 +96,80 @@ const char* DEVICE_TOKEN = "Токен_з_Telegram_бота";
 
 ## Крок 5. Завантажте прошивку на плату
 
+### Варіант A: Швидка прошивка через скрипт (Linux/Mac/Windows)
+
+**Підтримувані плати:**
+- Wemos D1 Mini
+- NodeMCU ESP8266
+- ESP32 DevKit, NodeMCU-32S
+- ESP32-C3 SuperMini, DevKit-M1
+- ESP32-C6 DevKit (підтримує 5 GHz WiFi)
+
+**Для Linux:**
+1. Встановіть Arduino CLI:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+   # Або через пакетний менеджер:
+   sudo apt install arduino-cli  # Ubuntu/Debian
+   ```
+
+2. Додайте користувача до групи dialout (для доступу до послідовних портів):
+   ```bash
+   sudo usermod -aG dialout $USER
+   # Потім вийдіть і знову увійдіть в систему
+   ```
+
+3. Запустіть скрипт:
+   ```bash
+   cd firmware
+   chmod +x flash.sh  # зробити виконуваним (тільки перший раз)
+   ./flash.sh
+   ```
+
+4. Слідуйте інструкціям на екрані (виберіть плату, введіть WiFi дані та токен)
+
+**Для macOS:**
+1. Встановіть Arduino CLI:
+   ```bash
+   # Через Homebrew (рекомендовано):
+   brew install arduino-cli
+   
+   # Або вручну:
+   curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+   ```
+
+2. Запустіть скрипт:
+   ```bash
+   cd firmware
+   chmod +x flash.sh  # зробити виконуваним (тільки перший раз)
+   ./flash.sh
+   ```
+
+3. Слідуйте інструкціям на екрані
+
+**Для Windows:**
+1. Встановіть Arduino CLI через winget:
+   ```powershell
+   winget install Arduino.arduino-cli
+   ```
+
+2. Запустіть скрипт:
+   ```powershell
+   cd firmware
+   .\flash.ps1
+   ```
+
+### Варіант B: Ручна прошивка через Arduino IDE
+
 1. Підключіть плату до комп'ютера через USB
 2. Відкрийте файл `.ino` з папки вашої плати в Arduino IDE
 3. Оберіть вашу плату: **Tools → Board** → виберіть вашу модель
    - Для NodeMCU ESP8266: `NodeMCU 1.0 (ESP-12E Module)`
-   - Для Wemos D1: `LOLIN(WEMOS) D1 R2 & mini`
+   - Для Wemos D1 Mini: `LOLIN(WEMOS) D1 R2 & mini`
    - Для ESP32 DevKit: `ESP32 Dev Module`
-4. Оберіть порт: **Tools → Port** → виберіть COM-порт вашої плати
+   - Для ESP32-C3 SuperMini: `ESP32C3 Dev Module`
+   - Для ESP32-C6: `ESP32C6 Dev Module`
+4. Оберіть порт: **Tools → Port** → виберіть COM-порт (Windows), /dev/ttyUSB* (Linux) або /dev/cu.usbserial* (macOS)
 5. Натисніть кнопку **Upload** (стрілка вправо)
 6. Дочекайтеся завершення завантаження
 
@@ -135,7 +204,7 @@ const char* DEVICE_TOKEN = "Токен_з_Telegram_бота";
 
 **Пристрій не підключається до WiFi**
 - Перевірте правильність назви мережі та пароля в `config.h`
-- Переконайтеся що WiFi працює на частоті 2.4 GHz (5 GHz не підтримується)
+- Переконайтеся що WiFi працює на частоті 2.4 GHz (5 GHz підтримується тільки ESP32-C6)
 - Спробуйте перезавантажити роутер
 
 **Світлодіод горить постійно**
@@ -164,7 +233,7 @@ const char* DEVICE_TOKEN = "Токен_з_Telegram_бота";
 
 **Компіляція зупиняється з помилкою**
 - Перевірте що встановили правильний Board Package (esp8266 або esp32)
-- Переконайтеся що відкрили .ino файл з правильної папки (esp8266 або esp32)
+- Переконайтеся що відкрили .ino файл з правильної папки (esp8266, esp32, esp32c3 або esp32c6)
 
 **Сповіщення не приходять**
 - Увімкніть сповіщення від бота в Telegram
@@ -181,6 +250,41 @@ const char* DEVICE_TOKEN = "Токен_з_Telegram_бота";
 | `HEARTBEAT_INTERVAL` | 30000 (30 секунд) | Як часто відправляти сигнал |
 | `WIFI_TIMEOUT` | 30000 (30 секунд) | Скільки чекати підключення до WiFi |
 | `DEBUG_SERIAL` | 0 (вимкнено) | Увімкнути відладку через Serial Monitor |
+
+### Використання скрипта з параметрами
+
+**Linux/Mac (`flash.sh`):**
+```bash
+# Список доступних портів
+./flash.sh --list-ports
+
+# Прошивка Wemos D1 Mini (найпопулярніша плата)
+./flash.sh --board wemos --port /dev/ttyUSB0 --ssid "MyWiFi" --password "pass" --token "abc123"
+
+# Прошивка NodeMCU ESP8266
+./flash.sh --board esp8266 --port /dev/ttyUSB0 --ssid "MyWiFi" --password "pass" --token "abc123"
+
+# Прошивка ESP32-C3 SuperMini
+./flash.sh --board esp32c3 --port /dev/ttyACM0 --ssid "MyWiFi" --password "pass" --token "abc123"
+
+# Пропустити встановлення ядра (якщо вже встановлено)
+./flash.sh --skip-core-install
+```
+
+**Windows (`flash.ps1`):**
+```powershell
+# Список доступних портів
+.\flash.ps1 -ListPorts
+
+# Прошивка Wemos D1 Mini (Board: wemos, esp8266, esp32, esp32c3, esp32c6)
+.\flash.ps1 -Board wemos -Port COM3 -SSID "MyWiFi" -Password "pass" -Token "abc123"
+
+# Прошивка ESP32-C6 (підтримує 5 GHz WiFi)
+.\flash.ps1 -Board esp32c6 -Port COM3 -SSID "MyWiFi" -Password "pass" -Token "abc123"
+
+# Пропустити встановлення ядра
+.\flash.ps1 -SkipCoreInstall
+```
 
 ---
 
